@@ -36,7 +36,7 @@ return new class extends Migration
             $table->dateTime('fecha_sesion')->nullable();
             $table->string('moderador')->nullable();
 
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
 
             // Un participante no puede repetir la misma tarea en el mismo aplicativo
             $table->unique(
