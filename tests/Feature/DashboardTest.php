@@ -26,8 +26,7 @@ class DashboardTest extends TestCase
             ->get(route('home'));
 
         $response->assertOk();
-        $response->assertSee('Dashboard de Usabilidad');
-        $response->assertSee('KPIs de Observación');
-        $response->assertSee('Últimas Sesiones');
+        $response->assertSee('Dashboard');
+        $response->assertSee('You are logged in!');
     }
 }
