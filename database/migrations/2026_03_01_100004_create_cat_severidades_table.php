@@ -19,3 +19,4 @@ return new class extends Migration
         Schema::dropIfExists('cat_severidades');
     }
 };
+  
