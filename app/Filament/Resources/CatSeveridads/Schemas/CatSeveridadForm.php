@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CatSeveridads\Schemas;
 
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class CatSeveridadForm
@@ -10,7 +11,8 @@ class CatSeveridadForm
     {
         return $schema
             ->components([
-                //
+                TextInput::make('nombre')
+                    ->required(),
             ]);
     }
 }

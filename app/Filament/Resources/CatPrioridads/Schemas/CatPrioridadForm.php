@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CatPrioridads\Schemas;
 
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class CatPrioridadForm
@@ -10,7 +11,8 @@ class CatPrioridadForm
     {
         return $schema
             ->components([
-                //
+                TextInput::make('nombre')
+                    ->required(),
             ]);
     }
 }

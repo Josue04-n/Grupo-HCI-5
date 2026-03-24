@@ -14,22 +14,35 @@ class ParticipantesTable
     {
         return $table
             ->columns([
-                TextColumn::make('prueba_id')
-                    ->numeric()
-                    ->sortable(),
+                // CAMBIO AQUÍ: Usamos la relación 'prueba' para mostrar el 'nombre'
+                TextColumn::make('prueba.nombre')
+                    ->label('Plan de Prueba')
+                    ->sortable()
+                    ->searchable(),
+
                 TextColumn::make('codigo')
-                    ->searchable(),
+                    ->label('ID Participante')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('perfil')
+                    ->label('Perfil de Usuario')
                     ->searchable(),
+
                 TextColumn::make('experiencia')
+                    ->label('Nivel de Experiencia')
                     ->searchable(),
+
                 TextColumn::make('edad')
                     ->numeric()
                     ->sortable(),
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -37,11 +50,12 @@ class ParticipantesTable
             ])
             ->filters([
                 //
+
             ])
             ->recordActions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([ // Corregido: bulkActions suele envolver a BulkActionGroup
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

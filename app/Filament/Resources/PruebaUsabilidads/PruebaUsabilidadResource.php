@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PruebaUsabilidads;
 
+use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\PruebaUsabilidads\Pages\CreatePruebaUsabilidad;
 use App\Filament\Resources\PruebaUsabilidads\Pages\EditPruebaUsabilidad;
 use App\Filament\Resources\PruebaUsabilidads\Pages\ListPruebaUsabilidads;

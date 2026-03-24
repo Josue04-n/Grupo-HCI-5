@@ -9,7 +9,7 @@ class Tarea extends Model
 protected $table = 'tareas';
 
     protected $fillable = [
-        'prueba_id', 'codigo', 'escenario', 'resultado_esperado', 
+        'prueba_id', 'codigo','nombre', 'escenario', 'resultado_esperado', 
         'metrica_principal', 'criterio_exito', 'guion_texto', 'pregunta_seguimiento'
     ];
 

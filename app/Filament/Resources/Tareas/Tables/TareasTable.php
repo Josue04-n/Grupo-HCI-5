@@ -14,15 +14,19 @@ class TareasTable
     {
         return $table
             ->columns([
-                TextColumn::make('prueba_id')
+                TextColumn::make('prueba.nombre')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('nombre')
+                    ->searchable(), 
                 TextColumn::make('codigo')
                     ->searchable(),
                 TextColumn::make('metrica_principal')
                     ->searchable(),
                 TextColumn::make('criterio_exito')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -34,6 +38,8 @@ class TareasTable
             ])
             ->filters([
                 //
+            ])->recordActions([
+                EditAction::make(),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -42,6 +48,7 @@ class TareasTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+                
             ]);
     }
 }
