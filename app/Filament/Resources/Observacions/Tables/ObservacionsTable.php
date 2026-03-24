@@ -14,7 +14,7 @@ class ObservacionsTable
     {
         return $table
             ->columns([
-                // 1. SESIÓN: Mostramos Participante y Tarea a través de la relación
+                // 1. SESIÓN: Mostramos Participante y Tarea a de una través de la relación
                 TextColumn::make('sesion.participante.codigo')
                     ->label('Sujeto')
                     ->badge()
