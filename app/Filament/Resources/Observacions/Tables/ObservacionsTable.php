@@ -14,35 +14,62 @@ class ObservacionsTable
     {
         return $table
             ->columns([
-                TextColumn::make('sesion_id')
-                    ->numeric()
+                // 1. SESIÓN: Mostramos Participante y Tarea a de una través de la relación
+                TextColumn::make('sesion.participante.codigo')
+                    ->label('Sujeto')
+                    ->badge()
+                    ->color('gray')
                     ->sortable(),
-                TextColumn::make('severidad_id')
-                    ->numeric()
+
+                TextColumn::make('sesion.tarea.codigo')
+                    ->label('Tarea')
                     ->sortable(),
+
+                TextColumn::make('sesion.aplicativo.nombre')
+                    ->label('App')
+                    ->sortable(),
+
+                // 2. SEVERIDAD: Nombre en lugar de ID
+                TextColumn::make('severidad.nombre')
+                    ->label('Severidad')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Baja' => 'gray',
+                        'Media' => 'warning',
+                        'Alta' => 'danger',
+                        'Crítica' => 'danger',
+                        default => 'primary',
+                    })
+                    ->sortable(),
+
+                // 3. MÉTRICAS
                 TextColumn::make('exito')
-                    ->badge(),
-                TextColumn::make('eficacia')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('eficiencia')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('satisfaccion')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Resultado')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Sí, sin ayuda' => 'success',
+                        'No completó' => 'danger',
+                        default => 'warning',
+                    }),
+
                 TextColumn::make('tiempo_seg')
+                    ->label('Tiempo (s)')
                     ->numeric()
                     ->sortable(),
+
                 TextColumn::make('errores')
+                    ->label('Errores')
+                    ->numeric()
+                    ->sortable()
+                    ->color('danger'),
+
+                TextColumn::make('satisfaccion')
+                    ->label('Satisfacción')
                     ->numeric()
                     ->sortable(),
+
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -52,7 +79,7 @@ class ObservacionsTable
             ->recordActions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([ // Corregido a bulkActions para evitar errores
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
