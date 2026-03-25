@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Providers\Filament;
-
+//usos necesarios para el panel de administración de Filament
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
