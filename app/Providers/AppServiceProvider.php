@@ -7,6 +7,7 @@ use Filament\View\PanelsRenderHook;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
 
+//creación de un proveedor de servicios para registrar un hook de renderizado en Filament que inyecta el código necesario para cargar el widget de accesibilidad de UserWay y aplicar estilos personalizados para asegurar su correcta visualización y funcionalidad en el panel de administración de Filament
 class AppServiceProvider extends ServiceProvider
 {
     /**
