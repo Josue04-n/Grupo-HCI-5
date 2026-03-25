@@ -9,6 +9,7 @@ use App\Filament\Resources\CatSeveridads\Schemas\CatSeveridadForm;
 use App\Filament\Resources\CatSeveridads\Tables\CatSeveridadsTable;
 use App\Models\CatSeveridad;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,7 +19,26 @@ class CatSeveridadResource extends Resource
 {
     protected static ?string $model = CatSeveridad::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    // --- ICONO REPRESENTATIVO ---
+    // Usamos un triángulo de advertencia para representar la severidad de los errores
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedExclamationTriangle;
+
+    // --- CONFIGURACIÓN DE MENÚ PROFESIONAL ---
+    
+    // Agrupado con los demás catálogos
+    protected static UnitEnum|string|null $navigationGroup = 'Catálogos';
+
+    // Corregimos el nombre que sale en el menú
+    protected static ?string $navigationLabel = 'Niveles de Severidad';
+
+    // Ordenamos (15 para ser el último del grupo)
+    protected static ?int $navigationSort = 15;
+
+    // Nombres para los títulos y botones
+    protected static ?string $pluralModelLabel = 'Niveles de Severidad';
+    protected static ?string $modelLabel = 'Nivel de Severidad';
+
+    // ------------------------------------------
 
     protected static ?string $recordTitleAttribute = 'nombre';
 

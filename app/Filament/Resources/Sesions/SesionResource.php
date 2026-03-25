@@ -9,6 +9,7 @@ use App\Filament\Resources\Sesions\Schemas\SesionForm;
 use App\Filament\Resources\Sesions\Tables\SesionsTable;
 use App\Models\Sesion;
 use BackedEnum;
+use UnitEnum; // Importante para el tipado
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,7 +19,23 @@ class SesionResource extends Resource
 {
     protected static ?string $model = Sesion::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    // --- ICONO REPRESENTATIVO ---
+    // Usamos una cámara de video para representar las sesiones grabadas
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedVideoCamera;
+
+    // --- CONFIGURACIÓN DE MENÚ ---
+    
+    // Nombre limpio en el menú
+    protected static ?string $navigationLabel = 'Sesiones de Prueba';
+
+    // Orden 3 (Después de Planes [1] y Tareas [2])
+    protected static ?int $navigationSort = 3;
+
+    // Corrección de plurales y etiquetas
+    protected static ?string $pluralModelLabel = 'Sesiones';
+    protected static ?string $modelLabel = 'Sesión';
+
+    // ------------------------------------------
 
     protected static ?string $recordTitleAttribute = 'id';
 

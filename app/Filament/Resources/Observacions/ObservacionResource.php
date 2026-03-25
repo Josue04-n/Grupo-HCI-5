@@ -9,6 +9,7 @@ use App\Filament\Resources\Observacions\Schemas\ObservacionForm;
 use App\Filament\Resources\Observacions\Tables\ObservacionsTable;
 use App\Models\Observacion;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -16,11 +17,26 @@ use Filament\Tables\Table;
 
 class ObservacionResource extends Resource
 {
+    // NO OLVIDAR DEFINIR EL MODELO
     protected static ?string $model = Observacion::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    // --- ICONO REPRESENTATIVO ---
+    // El icono de "Eye" (Ojo) es perfecto para observaciones
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEye;
 
-    protected static ?string $recordTitleAttribute = 'id';
+    // --- CONFIGURACIÓN DE MENÚ PROFESIONAL ---
+    
+    // Usamos el tipado seguro que le gusta a tu Symfony
+    protected static ?string $navigationLabel = 'Observaciones';
+    
+    protected static ?string $modelLabel = 'Observación';       
+    
+    protected static ?string $pluralModelLabel = 'Observaciones'; 
+
+    // Orden 4: (Planes 1 -> Tareas 2 -> Sesiones 3 -> Observaciones 4)
+    protected static ?int $navigationSort = 4; 
+
+    // ------------------------------------------
 
     public static function form(Schema $schema): Schema
     {

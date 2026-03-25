@@ -13,7 +13,7 @@ class EstadisticasPorAplicativo extends ChartWidget
 
     protected function getData(): array
     {
-        // Usamos Query Builder para evitar problemas de relaciones en dicho modelo 
+        // Usamos Query Builder para evitar problemas de relaciones en el modelo
         $data = DB::table('observaciones')
             ->join('sesiones', 'observaciones.sesion_id', '=', 'sesiones.id')
             ->join('cat_aplicativos', 'sesiones.aplicativo_id', '=', 'cat_aplicativos.id')

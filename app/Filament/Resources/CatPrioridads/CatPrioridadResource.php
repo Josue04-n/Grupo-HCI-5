@@ -9,6 +9,7 @@ use App\Filament\Resources\CatPrioridads\Schemas\CatPrioridadForm;
 use App\Filament\Resources\CatPrioridads\Tables\CatPrioridadsTable;
 use App\Models\CatPrioridad;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,7 +19,13 @@ class CatPrioridadResource extends Resource
 {
     protected static ?string $model = CatPrioridad::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFlag;
+    protected static UnitEnum|string|null $navigationGroup = 'Catálogos';
+    protected static ?string $navigationLabel = 'Prioridades de Atención';
+    protected static ?int $navigationSort = 14;
+    protected static ?string $pluralModelLabel = 'Prioridades';
+    protected static ?string $modelLabel = 'Prioridad';
+
 
     protected static ?string $recordTitleAttribute = 'nombre';
 
