@@ -22,7 +22,17 @@ class StatsHCI extends BaseWidget
             ->where('sesiones.aplicativo_id', 2)->sum('errores');
 
         return [
-           
+            Stat::make('Errores en JEP', $erroresJep)
+                ->description('Total clics fallidos')
+                ->descriptionIcon('heroicon-m-x-circle')
+                ->color('danger'),
+            Stat::make('Errores en Maquita', $erroresMaquita)
+                ->description('Total clics fallidos')
+                ->descriptionIcon('heroicon-m-check-circle')
+                ->color('success'),
+            Stat::make('Brecha de Eficiencia', abs($erroresJep - $erroresMaquita) . ' errores')
+                ->description('Diferencia entre apps')
+                ->color('warning'),
         ];
     }
 }
