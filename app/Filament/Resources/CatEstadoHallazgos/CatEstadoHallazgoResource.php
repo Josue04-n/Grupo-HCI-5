@@ -9,6 +9,7 @@ use App\Filament\Resources\CatEstadoHallazgos\Schemas\CatEstadoHallazgoForm;
 use App\Filament\Resources\CatEstadoHallazgos\Tables\CatEstadoHallazgosTable;
 use App\Models\CatEstadoHallazgo;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,7 +19,26 @@ class CatEstadoHallazgoResource extends Resource
 {
     protected static ?string $model = CatEstadoHallazgo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    // --- ICONO REPRESENTATIVO ---
+    // He puesto "ArrowPath" que simula un ciclo de estado/proceso
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowPath;
+
+    // --- CONFIGURACIÓN DE MENÚ PROFESIONAL ---
+    
+    // Agrupado con los demás catálogos
+    protected static UnitEnum|string|null $navigationGroup = 'Catálogos';
+
+    // Etiqueta limpia en el menú
+    protected static ?string $navigationLabel = 'Estados de Hallazgo';
+
+    // Orden dentro del grupo (11 para que vaya después de Aplicativos)
+    protected static ?int $navigationSort = 11;
+
+    // Nombres para los títulos y botones
+    protected static ?string $pluralModelLabel = 'Estados de Hallazgo';
+    protected static ?string $modelLabel = 'Estado de Hallazgo';
+
+    // ------------------------------------------
 
     protected static ?string $recordTitleAttribute = 'nombre';
 

@@ -9,6 +9,7 @@ use App\Filament\Resources\Hallazgos\Schemas\HallazgoForm;
 use App\Filament\Resources\Hallazgos\Tables\HallazgosTable;
 use App\Models\Hallazgo;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -16,11 +17,25 @@ use Filament\Tables\Table;
 
 class HallazgoResource extends Resource
 {
+    // Definimos el modelo
     protected static ?string $model = Hallazgo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    // --- ICONO REPRESENTATIVO ---
+    // Usamos el megáfono para representar las alertas o hallazgos encontrados
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMegaphone;
 
-    protected static ?string $recordTitleAttribute = 'problema';
+    // --- CONFIGURACIÓN DE MENÚ PROFESIONAL ---
+    
+    protected static ?string $navigationLabel = 'Hallazgos de Usabilidad';
+    
+    protected static ?string $modelLabel = 'Hallazgo';
+    
+    protected static ?string $pluralModelLabel = 'Hallazgos';
+
+    // Orden 6: El paso final después de observar a los participantes
+    protected static ?int $navigationSort = 6;
+
+    // ------------------------------------------
 
     public static function form(Schema $schema): Schema
     {
