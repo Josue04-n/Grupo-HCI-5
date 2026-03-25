@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 class StatsHCI extends BaseWidget
 {
+    protected static ?int $sort = 1;
+    
     protected function getStats(): array
     {
         // Datos JEP (Suponiendo ID 1)

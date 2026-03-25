@@ -7,11 +7,12 @@ use App\Models\Hallazgo;
 
 class HallazgosPorSeveridadChart extends ChartWidget
 {
+    
     // Título del gráfico (corregido sin la palabra 'static')
     protected ?string $heading = 'Hallazgos UX por Severidad'; 
     
     // El sort = 2 hace que este gráfico aparezca debajo de las tarjetas de estadísticas
-    protected static ?int $sort = 2; 
+    protected static ?int $sort = 1; 
 
     protected function getData(): array
     {

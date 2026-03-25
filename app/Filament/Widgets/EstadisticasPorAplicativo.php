@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 class EstadisticasPorAplicativo extends ChartWidget
 {
-    // QUITAMOS EL 'static' AQUÍ:
     protected ?string $heading = 'Rendimiento: JEP vs Maquita';
+    protected static ?int $sort = 2; 
 
     protected function getData(): array
     {
@@ -40,4 +40,14 @@ class EstadisticasPorAplicativo extends ChartWidget
     {
         return 'bar';
     }
+    protected function getOptions(): array
+{
+    return [
+        'scales' => [
+            'y' => [
+                'beginAtZero' => true,
+            ],
+        ],
+    ];
+}
 }

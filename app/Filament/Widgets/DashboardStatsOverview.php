@@ -10,7 +10,7 @@ use App\Models\Hallazgo;
 
 class DashboardStatsOverview extends BaseWidget
 {
-    protected static ?int $sort = 1; 
+    protected static ?int $sort = 2; 
 
     protected function getStats(): array
     {

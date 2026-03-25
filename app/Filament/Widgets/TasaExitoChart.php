@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 class TasaExitoChart extends ChartWidget
 {
     protected ?string $heading = 'Eficacia: % de Éxito Final (Porcentaje)';
+    protected static ?int $sort = 2; 
 
     protected function getData(): array
     {
@@ -43,4 +44,15 @@ class TasaExitoChart extends ChartWidget
     {
         return 'polarArea'; // Un estilo circular muy elegante
     }
+
+    protected function getOptions(): array
+{
+    return [
+        'scales' => [
+            'y' => [
+                'beginAtZero' => true,
+            ],
+        ],
+    ];
+}
 }
