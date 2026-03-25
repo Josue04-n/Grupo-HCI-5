@@ -62,7 +62,7 @@ class HallazgosTable
             ->recordActions([
                 EditAction::make(),
             ])
-            ->bulkActions([ // Corregido para evitar errores en versiones estables
+            ->bulkActions([ // Corregido para evitar errores en versiones estables en casi todos los dispositivos
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
