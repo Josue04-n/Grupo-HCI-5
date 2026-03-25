@@ -26,7 +26,19 @@ class ComparativaTareasChart extends ChartWidget
             ->pluck(DB::raw('SUM(errores)'), 'sesiones.tarea_id')->toArray();
 
         return [
-            
+            'datasets' => [
+                [
+                    'label' => 'Cooperativa JEP',
+                    'data' => array_values($dataJep),
+                    'backgroundColor' => '#3b82f6',
+                ],
+                [
+                    'label' => 'Cooperativa Maquita',
+                    'data' => array_values($dataMaquita),
+                    'backgroundColor' => '#f59e0b',
+                ],
+            ],
+            'labels' => ['Tarea 1', 'Tarea 2', 'Tarea 3'],
         ];
     }
 
