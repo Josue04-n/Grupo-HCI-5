@@ -24,7 +24,7 @@ class TasaExitoChart extends ChartWidget
                 ->where('sesiones.aplicativo_id', $id)
                 ->where('exito', 'Sí, sin ayuda')->count();
 
-           // $exitos[] = $total > 0 ? round(($completas / $total) * 100, 2) : 0;
+           $exitos[] = $total > 0 ? round(($completas / $total) * 100, 2) : 0;
         }
 
         return [
