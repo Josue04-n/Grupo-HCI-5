@@ -11,4 +11,10 @@ class CreateCatSeveridad extends CreateRecord
     protected static ?string $breadcrumb = 'Creación';
     protected static ?string $title = 'Creación Severidad';
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+    
+
 }

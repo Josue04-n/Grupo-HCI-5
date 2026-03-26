@@ -19,4 +19,8 @@ class EditObservacion extends EditRecord
                 ->label('Eliminar'),
         ];
     }
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rules\Unique;
 
 class SesionForm
 {
@@ -14,7 +15,6 @@ class SesionForm
     {
         return $schema
             ->components([
-                // 1. Selección de la Prueba
                 Select::make('prueba_id')
                     ->label('Plan de Prueba')
                     ->relationship('prueba', 'nombre')
@@ -22,39 +22,52 @@ class SesionForm
                     ->live() 
                     ->preload(),
 
-                // 2. Selección del Participante (Filtrado corregido)
                 Select::make('participante_id')
                     ->label('Participante')
                     ->relationship(
                         name: 'participante', 
                         titleAttribute: 'codigo',
+                        // CORRECCIÓN: Quitamos el "Get" antes de "$get"
                         modifyQueryUsing: fn (Builder $query, $get) => 
                             $query->where('prueba_id', $get('prueba_id'))
                     )
                     ->required()
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    // --- LA REGLA DE PREVENCIÓN DE ERRORES (UX) ---
+                    ->unique(
+                        table: 'sesiones',
+                        ignoreRecord: true,
+                        // CORRECCIÓN: Quitamos el "Get" antes de "$get"
+                        modifyRuleUsing: function (Unique $rule, $get) {
+                            return $rule
+                                ->where('tarea_id', $get('tarea_id'))
+                                ->where('aplicativo_id', $get('aplicativo_id'));
+                        }
+                    )
+                    ->validationMessages([
+                        'unique' => 'Error: Este participante ya fue evaluado en esta Tarea y Aplicativo.',
+                    ]),
+                    // ----------------------------------------------
 
-                // 3. Selección de la Tarea (Filtrado corregido)
                 Select::make('tarea_id')
                     ->label('Tarea a evaluar')
                     ->relationship(
                         name: 'tarea', 
                         titleAttribute: 'codigo',
+                        // CORRECCIÓN: Quitamos el "Get" antes de "$get"
                         modifyQueryUsing: fn (Builder $query, $get) => 
                             $query->where('prueba_id', $get('prueba_id'))
                     )
                     ->required()
                     ->preload(),
 
-                // 4. Selección del Aplicativo
                 Select::make('aplicativo_id')
                     ->label('Aplicativo evaluado')
                     ->relationship('aplicativo', 'nombre')
                     ->required()
                     ->native(false),
 
-                // 5. Datos de control
                 DateTimePicker::make('fecha_sesion')
                     ->label('Fecha y Hora')
                     ->default(now())

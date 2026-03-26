@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Participantes\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
+// --- IMPORTANTE: Añadimos la regla Unique ---
+use Illuminate\Validation\Rules\Unique;
 
 class ParticipanteForm
 {
@@ -12,28 +14,37 @@ class ParticipanteForm
     {
         return $schema
             ->components([
-                // 1. Selección de la prueba por nombre en lugar de ID manual
                 Select::make('prueba_id')
                     ->label('Plan de Prueba')
-                    ->relationship('prueba', 'nombre') // 'prueba' es la relación en tu modelo
+                    ->relationship('prueba', 'nombre')
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->columnSpanFull(), // Ocupa todo el ancho para mejor lectura
+                    ->columnSpanFull(),
 
-                // 2. Identificación del participante (P1, P2, etc.)
                 TextInput::make('codigo')
                     ->label('Código')
                     ->placeholder('Ej: P1')
-                    ->required(),
+                    ->required()
+                    // --- LA REGLA DE PREVENCIÓN DE ERRORES (UX) ---
+                    ->unique(
+                        table: 'participantes',
+                        ignoreRecord: true,
+                        // Verificamos que no se repita el código dentro del mismo Plan de Prueba
+                        modifyRuleUsing: function (Unique $rule, $get) {
+                            return $rule->where('prueba_id', $get('prueba_id'));
+                        }
+                    )
+                    ->validationMessages([
+                        'unique' => 'Error: Ya existe un participante con este código en el Plan de Prueba seleccionado.',
+                    ]),
+                    // ----------------------------------------------
 
-                // 3. Perfil del usuario (Externo, Interno, etc.)
                 TextInput::make('perfil')
                     ->label('Perfil')
                     ->placeholder('Ej: Usuario externo')
                     ->required(),
 
-                // 4. Experiencia y Edad
                 TextInput::make('experiencia')
                     ->label('Experiencia previa')
                     ->placeholder('Ej: Sin experiencia')

@@ -8,6 +8,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 use App\Models\Sesion;
 use App\Models\CatSeveridad;
+// --- IMPORTANTE: Añadimos la regla Unique ---
+use Illuminate\Validation\Rules\Unique;
 
 class ObservacionForm
 {
@@ -15,27 +17,30 @@ class ObservacionForm
     {
         return $schema
             ->components([
-                // 1. SESIÓN: Ahora muestra Participante y Tarea en lugar de ID
                 Select::make('sesion_id')
-            ->label('Sesión del Participante')
-            ->required()
-            ->options(function () {
-                // Cargamos las sesiones con sus relaciones para traer el Código real
-                return Sesion::with(['participante', 'tarea', 'aplicativo'])->get()->mapWithKeys(function ($sesion) {
-                    // Accedemos al código del participante (P1, P2...) y no a su ID numérico
-                    $participante = $sesion->participante ? $sesion->participante->codigo : "S/N";
-                    $tarea = $sesion->tarea ? $sesion->tarea->codigo : "T/N";
-                    $aplicativo = $sesion->aplicativo ? $sesion->aplicativo->nombre : "App";
+                    ->label('Sesión del Participante')
+                    ->required()
+                    ->options(function () {
+                        return Sesion::with(['participante', 'tarea', 'aplicativo'])->get()->mapWithKeys(function ($sesion) {
+                            $participante = $sesion->participante ? $sesion->participante->codigo : "S/N";
+                            $tarea = $sesion->tarea ? $sesion->tarea->prueba->nombre : "T/N";
+                            $aplicativo = $sesion->aplicativo ? $sesion->aplicativo->nombre : "App";
 
-                    return [
-                        $sesion->id => "Sesión #{$sesion->id} | {$participante} | {$tarea} | {$aplicativo}"
-                    ];
-                });
-            })
-            ->searchable()
-            ->preload(),
+                            return [
+                                $sesion->id => "Sesión #{$sesion->id} | {$participante} | {$tarea} | {$aplicativo}"
+                            ];
+                        });
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->unique(
+                        table: 'observaciones',
+                        ignoreRecord: true
+                    )
+                    ->validationMessages([
+                        'unique' => 'Error: Ya existe una observación registrada y evaluada para esta Sesión.',
+                    ]),
 
-                // 2. SEVERIDAD: Ahora muestra los nombres (Alta, Media, Baja)
                 Select::make('severidad_id')
                     ->label('Nivel de Severidad')
                     ->options(function() {
@@ -44,7 +49,6 @@ class ObservacionForm
                     ->required()
                     ->searchable(),
 
-                // 3. ÉXITO (Ya estaba bien como Select)
                 Select::make('exito')
                     ->label('Estado de Finalización')
                     ->options([

@@ -4,10 +4,11 @@ namespace App\Filament\Resources\Sesions\Tables;
 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables\Filters\SelectFilter; // Importamos el componente de filtros
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Illuminate\Database\Eloquent\Builder; 
 
 class SesionsTable
 {
@@ -46,29 +47,40 @@ class SesionsTable
                     ->searchable(),
             ])
             ->filters([
-                // Filtro por Participante (Lista única de la tabla Participantes)
-                SelectFilter::make('participante_id')
+                SelectFilter::make('participante_codigo')
                     ->label('Filtrar por Participante')
-                    // Usamos options() para asegurar que solo salgan una vez
-                    ->options(fn () => \App\Models\Participante::pluck('codigo', 'id')->toArray())
+                    ->options(fn () => \App\Models\Participante::select('codigo')->distinct()->pluck('codigo', 'codigo')->toArray())
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['value'])) {
+                            $query->whereHas('participante', function ($q) use ($data) {
+                                $q->where('codigo', $data['value']);
+                            });
+                        }
+                    }),
 
-                // Filtro por Tarea (Lista única de la tabla Tareas)
-                SelectFilter::make('tarea_id')
+                SelectFilter::make('tarea_codigo')
                     ->label('Filtrar por Tarea')
-                    ->options(fn () => \App\Models\Tarea::pluck('codigo', 'id')->toArray())
+                    ->options(fn () => \App\Models\Tarea::select('codigo')->distinct()->pluck('codigo', 'codigo')->toArray())
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['value'])) {
+                            $query->whereHas('tarea', function ($q) use ($data) {
+                                $q->where('codigo', $data['value']);
+                            });
+                        }
+                    }),
                 
-                // Filtro por Aplicativo
                 SelectFilter::make('aplicativo_id')
                     ->label('Filtrar por Aplicativo')
-                    ->options(fn () => \App\Models\CatAplicativo::pluck('nombre', 'id')->toArray())
+                    ->relationship('aplicativo', 'nombre')
                     ->preload(),
             ])
             ->actions([
-                EditAction::make(),
+                EditAction::make()
+                    ->label('Edición'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

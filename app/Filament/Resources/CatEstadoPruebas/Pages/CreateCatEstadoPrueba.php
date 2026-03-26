@@ -10,4 +10,9 @@ class CreateCatEstadoPrueba extends CreateRecord
     protected static string $resource = CatEstadoPruebaResource::class;
     protected static ?string $breadcrumb = 'Creación';
     protected static ?string $title = 'Creación Catálogo de Estado de Pruebas';
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

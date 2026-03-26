@@ -10,4 +10,10 @@ class CreateTarea extends CreateRecord
     protected static string $resource = TareaResource::class;
     protected static ?string $breadcrumb = 'Creación';
     protected static ?string $title = 'Creación Tarea';
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+    
 }

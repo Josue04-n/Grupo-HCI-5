@@ -10,4 +10,8 @@ class CreateSesion extends CreateRecord
     protected static string $resource = SesionResource::class;
     protected static ?string $breadcrumb = 'Creación';
     protected static ?string $title = 'Creación Sesión';
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
