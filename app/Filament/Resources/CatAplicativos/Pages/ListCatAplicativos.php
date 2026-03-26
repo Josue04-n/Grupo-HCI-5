@@ -9,11 +9,15 @@ use Filament\Resources\Pages\ListRecords;
 class ListCatAplicativos extends ListRecords
 {
     protected static string $resource = CatAplicativoResource::class;
+    protected static ?string $breadcrumb = 'Lista';
+
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Nuevo Aplicativo')
+                ->icon('heroicon-o-plus'),
         ];
     }
 }

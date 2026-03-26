@@ -8,4 +8,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateObservacion extends CreateRecord
 {
     protected static string $resource = ObservacionResource::class;
+    protected static ?string $breadcrumb = 'Creación';
+    protected static ?string $title = 'Creación Observación';
 }

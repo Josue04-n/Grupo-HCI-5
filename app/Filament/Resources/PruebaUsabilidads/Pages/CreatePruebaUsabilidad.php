@@ -8,4 +8,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreatePruebaUsabilidad extends CreateRecord
 {
     protected static string $resource = PruebaUsabilidadResource::class;
+    protected static ?string $breadcrumb = 'Creación';
+    protected static ?string $title = 'Creación Prueba de Usabilidad';
 }

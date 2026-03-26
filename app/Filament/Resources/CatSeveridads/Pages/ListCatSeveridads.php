@@ -9,11 +9,15 @@ use Filament\Resources\Pages\ListRecords;
 class ListCatSeveridads extends ListRecords
 {
     protected static string $resource = CatSeveridadResource::class;
+    protected static ?string $breadcrumb = 'Lista';
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Nueva Severidad')
+                ->icon('heroicon-o-plus'),
+
         ];
     }
 }

@@ -9,11 +9,14 @@ use Filament\Resources\Pages\EditRecord;
 class EditCatEstadoPrueba extends EditRecord
 {
     protected static string $resource = CatEstadoPruebaResource::class;
+    protected static ?string $breadcrumb = 'Edición';
+    protected static ?string $title = 'Edición Estado de Pruebas';
 
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->label('Eliminar'),
         ];
     }
 }

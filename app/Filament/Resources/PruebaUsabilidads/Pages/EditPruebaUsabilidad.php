@@ -9,11 +9,14 @@ use Filament\Resources\Pages\EditRecord;
 class EditPruebaUsabilidad extends EditRecord
 {
     protected static string $resource = PruebaUsabilidadResource::class;
+    protected static ?string $breadcrumb = 'Edición';
+    protected static ?string $title = 'Edición Prueba de Usabilidad';
 
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->label('Eliminar'),
         ];
     }
 }

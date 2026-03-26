@@ -8,4 +8,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateCatPrioridad extends CreateRecord
 {
     protected static string $resource = CatPrioridadResource::class;
+    protected static ?string $breadcrumb = 'Creación';
+    protected static ?string $title = 'Creación Prioridad';
 }

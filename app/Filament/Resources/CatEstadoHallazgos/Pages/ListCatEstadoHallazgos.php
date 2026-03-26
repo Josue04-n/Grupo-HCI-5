@@ -9,11 +9,14 @@ use Filament\Resources\Pages\ListRecords;
 class ListCatEstadoHallazgos extends ListRecords
 {
     protected static string $resource = CatEstadoHallazgoResource::class;
+    protected static ?string $breadcrumb = 'Lista';
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Nuevo Estado de Hallazgo')
+                ->icon('heroicon-o-plus'),
         ];
     }
 }
