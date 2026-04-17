@@ -6,7 +6,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/UI-Tailwind%20CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com)
 [![Copilot Reviewed](https://img.shields.io/badge/GitHub-Copilot%20Reviewed-24292e?style=for-the-badge&logo=github)](https://github.com/features/copilot)
 
-> **Plataforma avanzada para la gestión de pruebas de usabilidad y análisis de Interacción Humano-Computador (HCI).**
+## About Laravel 
 
 UX Lab Analytics es un ecosistema diseñado para ingenieros y especialistas en UX. Permite gestionar el ciclo de vida completo de una evaluación de interfaces: desde la planificación estratégica hasta la cuantificación de hallazgos técnicos. Optimizado para la comparativa de métricas de eficiencia y eficacia según la norma **ISO 9241-11** (Caso de estudio: Cooperativa JEP vs. Maquita).
 

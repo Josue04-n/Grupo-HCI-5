@@ -7,21 +7,40 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\PruebaUsabilidad;
 use App\Models\Observacion;
 use App\Models\Hallazgo;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 class DashboardStatsOverview extends BaseWidget
 {
+    use InteractsWithPageFilters;
+
     protected static ?int $sort = 2; 
 
     protected function getStats(): array
     {
-        $tareasExitosas = Observacion::where('exito', '!=', 'No completó')->count();
-        $tiempoPromedio = Observacion::avg('tiempo_seg') ?? 0;
-        $totalErrores = Observacion::sum('errores');
-        $totalHallazgos = Hallazgo::count();
+        $pruebaId = $this->filters['prueba_id'] ?? null;
+
+        $observacionQuery = Observacion::query();
+        $hallazgoQuery = Hallazgo::query();
+
+        if ($pruebaId) {
+            $observacionQuery->whereHas('sesion', function ($query) use ($pruebaId) {
+                $query->where('prueba_id', $pruebaId);
+            });
+            $hallazgoQuery->where('prueba_id', $pruebaId);
+        }
+
+        $tareasExitosas = (clone $observacionQuery)->where('exito', '!=', 'No completó')->count();
+        $tiempoPromedio = (clone $observacionQuery)->avg('tiempo_seg') ?? 0;
+        $totalErrores = (clone $observacionQuery)->sum('errores');
+        $totalHallazgos = $hallazgoQuery->count();
+
+        // Mostrar 'Pruebas Creadas' siempre o, si está filtrado, podemos mostrar 'Participantes' u otra métrica relevante?
+        // Dejaremos Pruebas Creadas, o podemos mostrar el total del sistema.
+        $pruebasCreadas = PruebaUsabilidad::count();
 
         return [
-            Stat::make('Pruebas Creadas', PruebaUsabilidad::count())
-                ->description('Planes de prueba activos')
+            Stat::make('Pruebas Creadas', $pruebasCreadas)
+                ->description('Planes de prueba activos en total')
                 ->descriptionIcon('heroicon-m-clipboard-document-list')
                 ->color('info'),
 
@@ -30,7 +49,7 @@ class DashboardStatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
 
-            Stat::make('Tiempo Promedio', number_format($tiempoPromedio, 2) . ' seg')
+            Stat::make('Tiempo Promedio', number_format((float) $tiempoPromedio, 2) . ' seg')
                 ->description('Duración media por tarea')
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('warning'),
