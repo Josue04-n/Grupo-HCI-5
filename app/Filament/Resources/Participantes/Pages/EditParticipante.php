@@ -10,10 +10,18 @@ class EditParticipante extends EditRecord
 {
     protected static string $resource = ParticipanteResource::class;
 
+    protected static ?string $breadcrumb = 'Edicion';
+    protected static ?string $title = 'Edicion Participante';
+
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->label('Eliminar'),
         ];
+    }
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

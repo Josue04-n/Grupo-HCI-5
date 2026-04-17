@@ -9,11 +9,18 @@ use Filament\Resources\Pages\EditRecord;
 class EditCatSeveridad extends EditRecord
 {
     protected static string $resource = CatSeveridadResource::class;
+    protected static ?string $breadcrumb = 'Edición';
+    protected static ?string $title = 'Edición Severidad';
 
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->label('Eliminar'),
         ];
+    }
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

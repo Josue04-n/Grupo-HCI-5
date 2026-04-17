@@ -13,7 +13,9 @@ class ListTareas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Nueva Tarea')
+                ->icon('heroicon-o-plus'),
         ];
     }
 }

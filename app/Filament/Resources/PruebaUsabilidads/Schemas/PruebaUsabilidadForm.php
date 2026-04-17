@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PruebaUsabilidads\Schemas;
 
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -53,9 +54,10 @@ class PruebaUsabilidadForm
                     ->label('Perfil de los Participantes')
                     ->columnSpanFull(),
 
-                DatePicker::make('fecha')
-                    ->native(false)
-                    ->displayFormat('d/m/Y'),
+                DateTimePicker::make('fecha_sesion')
+                    ->label('Fecha y Hora')
+                    ->default(now())
+                    ->required(),
 
                 TextInput::make('lugar'),
                 
