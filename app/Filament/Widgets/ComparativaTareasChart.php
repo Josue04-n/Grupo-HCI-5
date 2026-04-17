@@ -5,36 +5,51 @@ namespace App\Filament\Widgets;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
 use App\Models\Tarea;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 class ComparativaTareasChart extends ChartWidget
 {
-    
+    use InteractsWithPageFilters;
+
     protected ?string $heading = 'Eficiencia: Errores por Tarea (JEP vs Maquita)';
     protected static ?int $sort = 1;
-    
 
     protected function getData(): array
     {
-        $tareas = Tarea::orderBy('id')->get();
+        $pruebaId = $this->filters['prueba_id'] ?? null;
+
+        $tareasQuery = Tarea::orderBy('id');
+        if ($pruebaId) {
+            $tareasQuery->where('prueba_id', $pruebaId);
+        }
+        $tareas = $tareasQuery->get();
         $labels = $tareas->pluck('codigo')->toArray(); 
         $tareaIds = $tareas->pluck('id')->toArray();
 
-        $rawJep = DB::table('observaciones')
+        $queryJep = DB::table('observaciones')
             ->join('sesiones', 'observaciones.sesion_id', '=', 'sesiones.id')
             ->where('sesiones.aplicativo_id', 1)
             ->groupBy('sesiones.tarea_id')
-            ->select('sesiones.tarea_id', DB::raw('SUM(observaciones.errores) as total_errores'))
-            ->pluck('total_errores', 'tarea_id')
-            ->toArray();
+            ->select('sesiones.tarea_id', DB::raw('SUM(observaciones.errores) as total_errores'));
+            
+        if ($pruebaId) {
+            $queryJep->where('sesiones.prueba_id', $pruebaId);
+        }
+        
+        $rawJep = $queryJep->pluck('total_errores', 'tarea_id')->toArray();
 
-        // 3. Consultamos los errores de Maquita (Aplicativo ID: 2)
-        $rawMaquita = DB::table('observaciones')
+        // Consultamos los errores de Maquita (Aplicativo ID: 2)
+        $queryMaquita = DB::table('observaciones')
             ->join('sesiones', 'observaciones.sesion_id', '=', 'sesiones.id')
             ->where('sesiones.aplicativo_id', 2)
             ->groupBy('sesiones.tarea_id')
-            ->select('sesiones.tarea_id', DB::raw('SUM(observaciones.errores) as total_errores'))
-            ->pluck('total_errores', 'tarea_id')
-            ->toArray();
+            ->select('sesiones.tarea_id', DB::raw('SUM(observaciones.errores) as total_errores'));
+
+        if ($pruebaId) {
+            $queryMaquita->where('sesiones.prueba_id', $pruebaId);
+        }
+
+        $rawMaquita = $queryMaquita->pluck('total_errores', 'tarea_id')->toArray();
 
         $dataJep = [];
         $dataMaquita = [];

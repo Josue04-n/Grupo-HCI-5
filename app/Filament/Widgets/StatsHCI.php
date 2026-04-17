@@ -6,22 +6,37 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\Observacion;
 use Illuminate\Support\Facades\DB;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 class StatsHCI extends BaseWidget
 {
+    use InteractsWithPageFilters;
+
     protected static ?int $sort = 1;
     
     protected function getStats(): array
     {
+        $pruebaId = $this->filters['prueba_id'] ?? null;
+
         // Datos JEP (Suponiendo ID 1)
-        $erroresJep = DB::table('observaciones')
+        $queryJep = DB::table('observaciones')
             ->join('sesiones', 'observaciones.sesion_id', '=', 'sesiones.id')
-            ->where('sesiones.aplicativo_id', 1)->sum('errores');
+            ->where('sesiones.aplicativo_id', 1);
+
+        if ($pruebaId) {
+            $queryJep->where('sesiones.prueba_id', $pruebaId);
+        }
+        $erroresJep = $queryJep->sum('errores');
 
         // Datos Maquita (Suponiendo ID 2)
-        $erroresMaquita = DB::table('observaciones')
+        $queryMaquita = DB::table('observaciones')
             ->join('sesiones', 'observaciones.sesion_id', '=', 'sesiones.id')
-            ->where('sesiones.aplicativo_id', 2)->sum('errores');
+            ->where('sesiones.aplicativo_id', 2);
+
+        if ($pruebaId) {
+            $queryMaquita->where('sesiones.prueba_id', $pruebaId);
+        }
+        $erroresMaquita = $queryMaquita->sum('errores');
 
         return [
             Stat::make('Errores en JEP', $erroresJep)

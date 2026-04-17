@@ -17,27 +17,12 @@ use Filament\Tables\Table;
 
 class ParticipanteResource extends Resource
 {
-    // Definimos el modelo para que Filament sepa a dónde apuntar
     protected static ?string $model = Participante::class;
-
-    // --- ICONO REPRESENTATIVO ---
-    // Usamos el icono de grupo de personas
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
-
-    // --- CONFIGURACIÓN DE MENÚ ---
-    
-    // Label limpio
     protected static ?string $navigationLabel = 'Participantes';
-
-    // Orden 5 (Para que sigan la secuencia lógica)
     protected static ?int $navigationSort = 5;
-
-    // Nombres para los títulos y botones de la interfaz
     protected static ?string $pluralModelLabel = 'Participantes';
     protected static ?string $modelLabel = 'Participante';
-
-    // ------------------------------------------
-
     public static function form(Schema $schema): Schema
     {
         return ParticipanteForm::configure($schema);
