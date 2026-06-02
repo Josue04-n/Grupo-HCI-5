@@ -11,9 +11,14 @@ use Filament\Forms\Components\MarkdownEditor;
 use Filament\Schemas\Schema;
 use App\Models\PruebaUsabilidad;
 use App\Models\CatAplicativo;
+use App\Models\SprintBacklogHistory;
 use App\Ai\Agents\SprintPlanner;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\HtmlString;
 use BackedEnum;
 
 class AsistenteSprintBacklog extends Page implements HasForms
@@ -49,7 +54,44 @@ class AsistenteSprintBacklog extends Page implements HasForms
                     ->options(CatAplicativo::pluck('nombre', 'id'))
                     ->required()
                     ->searchable()
-                    ->live(),
+                    ->live()
+                    ->afterStateUpdated(function (Set $set) {
+                        $set('version_id', null);
+                        $this->resetBacklogDraft();
+                    }),
+
+                Select::make('version_id')
+                    ->label('Cargar Historial (Opcional)')
+                    ->placeholder('Seleccione un backlog guardado...')
+                    ->helperText(fn (Get $get) => !$get('aplicativo_id') ? 'Seleccione primero un aplicativo para ver su historial.' : null)
+                    ->options(function (Get $get) {
+                        $aplicativoId = $get('aplicativo_id');
+                        
+                        if (!$aplicativoId) {
+                            return [];
+                        }
+
+                        return SprintBacklogHistory::where('aplicativo_id', $aplicativoId)
+                            ->latest()
+                            ->get()
+                            ->pluck('version_name', 'id');
+                    })
+                    ->searchable()
+                    ->live()
+                    ->afterStateUpdated(function ($state) {
+                        if (!$state) return;
+                        
+                        $history = SprintBacklogHistory::find($state);
+                        if ($history) {
+                            $this->loadBacklogFromHistory($history->content);
+
+                            Notification::make()
+                                ->title('Versión cargada')
+                                ->body('Se ha cargado el backlog desde el historial.')
+                                ->success()
+                                ->send();
+                        }
+                    }),
             ])
             ->statePath('data');
     }
@@ -73,6 +115,27 @@ class AsistenteSprintBacklog extends Page implements HasForms
             'form',
             'backlogForm',
         ];
+    }
+
+    protected function resetBacklogDraft(): void
+    {
+        $this->backlogContent = null;
+        $this->backlogData = [];
+        $this->feedbackMessage = null;
+        $this->feedbackType = null;
+    }
+
+    protected function loadBacklogFromHistory(string $content): void
+    {
+        $this->backlogContent = $content;
+        $this->backlogData = [
+            'backlogContent' => $content,
+        ];
+    }
+
+    protected function getCurrentBacklogContent(): string
+    {
+        return (string) ($this->backlogData['backlogContent'] ?? $this->backlogContent ?? '');
     }
 
     public function generate(SprintPlanner $agent): void
@@ -109,10 +172,7 @@ class AsistenteSprintBacklog extends Page implements HasForms
                 return;
             }
 
-            $this->backlogContent = $agent->generateGlobalDraft($pruebas, $aplicativo->nombre);
-            $this->backlogData = [
-                'backlogContent' => $this->backlogContent,
-            ];
+            $this->loadBacklogFromHistory($agent->generateGlobalDraft($pruebas, $aplicativo->nombre));
 
             $this->feedbackMessage = 'Backlog generado correctamente. Ya puedes revisarlo o exportarlo.';
             $this->feedbackType = 'success';
@@ -135,9 +195,62 @@ class AsistenteSprintBacklog extends Page implements HasForms
         }
     }
 
-    public function exportMd()
+    public function saveHistory(): void
+    {
+        $aplicativoId = $this->data['aplicativo_id'] ?? null;
+        $content = $this->getCurrentBacklogContent();
+
+        if (!$aplicativoId || trim($content) === '') {
+            Notification::make()
+                ->title('Error al guardar')
+                ->body('Debe seleccionar un aplicativo y tener contenido generado.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $history = SprintBacklogHistory::create([
+            'aplicativo_id' => $aplicativoId,
+            'content' => $content,
+            'version_name' => 'Backlog ' . now()->format('d/m/Y H:i'),
+        ]);
+
+        $this->data['version_id'] = $history->id;
+
+        Notification::make()
+            ->title('Historial Guardado')
+            ->body('El backlog se ha guardado correctamente en el historial.')
+            ->success()
+            ->send();
+    }
+
+    public function previewPdf()
     {
         $content = $this->backlogData['backlogContent'] ?? $this->backlogContent ?? '';
+        
+        if (empty($content)) {
+            Notification::make()->title('No hay contenido para previsualizar')->warning()->send();
+            return;
+        }
+
+        // Convertimos Markdown a HTML para que el PDF se vea bien
+        $htmlContent = Str::markdown($content);
+
+        $pdf = Pdf::loadView('pdf.sprint-backlog', [
+            'content' => $htmlContent,
+        ]);
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, 'preview-backlog.pdf', [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="preview-backlog.pdf"',
+        ]);
+    }
+
+    public function exportMd()
+    {
+        $content = $this->getCurrentBacklogContent();
         $filename = 'Sprint-Backlog-' . Str::slug((string) ($this->data['aplicativo_id'] ?? 'backlog')) . '.md';
 
         return response()->streamDownload(function () use ($content) {
@@ -147,7 +260,7 @@ class AsistenteSprintBacklog extends Page implements HasForms
 
     public function exportPdf()
     {
-        $content = $this->backlogData['backlogContent'] ?? $this->backlogContent ?? '';
+        $content = $this->getCurrentBacklogContent();
         $filename = 'Sprint-Backlog-' . Str::slug((string) ($this->data['aplicativo_id'] ?? 'backlog')) . '.pdf';
 
         return response()->streamDownload(function () use ($content) {

@@ -24,30 +24,44 @@
     </x-filament::section>
 
     @if($backlogContent)
-        <x-filament::section class="mt-6">
-            <x-slot name="heading">
-                Borrador del Sprint Backlog
-            </x-slot>
+        <x-filament::section class="mt-6" heading="Borrador del Sprint Backlog">
+            <div class="mb-4 flex flex-wrap gap-3">
+                <x-filament::button 
+                    color="success" 
+                    icon="heroicon-m-cloud-arrow-up"
+                    wire:click="saveHistory"
+                    size="sm"
+                >
+                    Guardar en Historial
+                </x-filament::button>
 
-            <x-slot name="headerEnd">
-                <div class="flex gap-2">
-                    <x-filament::button 
-                        color="gray" 
-                        icon="heroicon-m-document-arrow-down"
-                        wire:click="exportMd"
-                    >
-                        Exportar .MD
-                    </x-filament::button>
-                    
-                    <x-filament::button 
-                        color="danger" 
-                        icon="heroicon-m-document-text"
-                        wire:click="exportPdf"
-                    >
-                        Exportar .PDF
-                    </x-filament::button>
-                </div>
-            </x-slot>
+                <x-filament::button 
+                    color="info" 
+                    icon="heroicon-m-eye"
+                    wire:click="previewPdf"
+                    size="sm"
+                >
+                    Vista Previa PDF
+                </x-filament::button>
+
+                <x-filament::button 
+                    color="gray" 
+                    icon="heroicon-m-document-arrow-down"
+                    wire:click="exportMd"
+                    size="sm"
+                >
+                    Exportar .MD
+                </x-filament::button>
+                
+                <x-filament::button 
+                    color="danger" 
+                    icon="heroicon-m-document-text"
+                    wire:click="exportPdf"
+                    size="sm"
+                >
+                    Exportar .PDF
+                </x-filament::button>
+            </div>
 
             {{ $this->backlogForm }}
         </x-filament::section>
