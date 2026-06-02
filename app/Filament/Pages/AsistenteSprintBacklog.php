@@ -13,6 +13,7 @@ use App\Models\PruebaUsabilidad;
 use App\Models\CatAplicativo;
 use App\Models\SprintBacklogHistory;
 use App\Ai\Agents\SprintPlanner;
+use App\Services\MondayService;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -36,6 +37,7 @@ class AsistenteSprintBacklog extends Page implements HasForms
     public ?array $data = [];
     public ?string $backlogContent = null;
     public ?array $backlogData = [];
+    public ?array $jsonItems = [];
     public ?string $feedbackMessage = null;
     public ?string $feedbackType = null;
 
@@ -83,7 +85,7 @@ class AsistenteSprintBacklog extends Page implements HasForms
                         
                         $history = SprintBacklogHistory::find($state);
                         if ($history) {
-                            $this->loadBacklogFromHistory($history->content);
+                            $this->loadBacklogFromHistory($history->content, $history->json_data);
 
                             Notification::make()
                                 ->title('Versión cargada')
@@ -121,16 +123,18 @@ class AsistenteSprintBacklog extends Page implements HasForms
     {
         $this->backlogContent = null;
         $this->backlogData = [];
+        $this->jsonItems = [];
         $this->feedbackMessage = null;
         $this->feedbackType = null;
     }
 
-    protected function loadBacklogFromHistory(string $content): void
+    protected function loadBacklogFromHistory(string $content, ?array $jsonData = null): void
     {
         $this->backlogContent = $content;
         $this->backlogData = [
             'backlogContent' => $content,
         ];
+        $this->jsonItems = $jsonData ?? [];
     }
 
     protected function getCurrentBacklogContent(): string
@@ -172,9 +176,11 @@ class AsistenteSprintBacklog extends Page implements HasForms
                 return;
             }
 
-            $this->loadBacklogFromHistory($agent->generateGlobalDraft($pruebas, $aplicativo->nombre));
+            $response = $agent->generateGlobalDraft($pruebas, $aplicativo->nombre);
+            
+            $this->loadBacklogFromHistory($response['markdown'] ?? '', $response['items'] ?? []);
 
-            $this->feedbackMessage = 'Backlog generado correctamente. Ya puedes revisarlo o exportarlo.';
+            $this->feedbackMessage = 'Backlog generado correctamente con Épicas y Story Points. Ya puedes publicarlo en Monday.com.';
             $this->feedbackType = 'success';
 
             Notification::make()
@@ -212,6 +218,7 @@ class AsistenteSprintBacklog extends Page implements HasForms
         $history = SprintBacklogHistory::create([
             'aplicativo_id' => $aplicativoId,
             'content' => $content,
+            'json_data' => $this->jsonItems,
             'version_name' => 'Backlog ' . now()->format('d/m/Y H:i'),
         ]);
 
@@ -219,9 +226,51 @@ class AsistenteSprintBacklog extends Page implements HasForms
 
         Notification::make()
             ->title('Historial Guardado')
-            ->body('El backlog se ha guardado correctamente en el historial.')
+            ->body('El backlog y los datos para Monday se han guardado correctamente.')
             ->success()
             ->send();
+    }
+
+    public function publishToMonday(MondayService $monday): void
+    {
+        if (!$monday->isConfigured()) {
+            Notification::make()
+                ->title('Monday.com no configurado')
+                ->body('Por favor, añade MONDAY_API_TOKEN y MONDAY_BOARD_ID a tu archivo .env')
+                ->warning()
+                ->send();
+            return;
+        }
+
+        if (empty($this->jsonItems)) {
+            Notification::make()
+                ->title('Sin datos para Monday')
+                ->body('Genera o carga un backlog con datos estructurados primero.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        try {
+            $aplicativo = CatAplicativo::find($this->data['aplicativo_id']);
+            $sprintName = "Sprint " . now()->format('d/m/Y') . " - " . ($aplicativo->nombre ?? 'UX');
+
+            $count = $monday->syncBacklog($sprintName, $this->jsonItems);
+
+            Notification::make()
+                ->title('Sincronización Exitosa')
+                ->body("Se han creado {$count} ítems en el tablero de Monday.com.")
+                ->success()
+                ->duration(10000)
+                ->send();
+
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->title('Error al publicar en Monday')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 
     public function previewPdf()

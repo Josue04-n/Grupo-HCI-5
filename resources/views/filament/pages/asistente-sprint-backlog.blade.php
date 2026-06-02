@@ -27,6 +27,15 @@
         <x-filament::section class="mt-6" heading="Borrador del Sprint Backlog">
             <div class="mb-4 flex flex-wrap gap-3">
                 <x-filament::button 
+                    style="background-color: #6161FF; color: white;"
+                    icon="heroicon-m-rocket-launch"
+                    wire:click="publishToMonday"
+                    size="sm"
+                >
+                    Publicar en Monday.com
+                </x-filament::button>
+
+                <x-filament::button 
                     color="success" 
                     icon="heroicon-m-cloud-arrow-up"
                     wire:click="saveHistory"

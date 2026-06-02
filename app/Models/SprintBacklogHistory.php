@@ -11,7 +11,12 @@ class SprintBacklogHistory extends Model
     protected $fillable = [
         'aplicativo_id',
         'content',
+        'json_data',
         'version_name'
+    ];
+
+    protected $casts = [
+        'json_data' => 'array',
     ];
 
     public function aplicativo()
