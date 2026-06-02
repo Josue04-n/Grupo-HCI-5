@@ -13,6 +13,11 @@ use App\Models\CatAplicativo;
 use App\Models\CatPrioridad;
 use App\Models\CatSeveridad;
 
+use Filament\Actions\Action;
+use Filament\Forms\Components\MarkdownEditor;
+use App\Ai\Agents\SprintPlanner;
+use Illuminate\Support\Facades\URL;
+
 class PruebaUsabilidadsTable
 {
     public static function configure(Table $table): Table
