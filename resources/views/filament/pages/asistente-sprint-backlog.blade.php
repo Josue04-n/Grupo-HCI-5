@@ -7,11 +7,14 @@
         @endif
 
         <form wire:submit="generate">
-            {{ $this->form }}
+            <div class="mb-8">
+                {{ $this->form }}
+            </div>
             
-            <div class="mt-4 flex justify-end">
+            <div class="flex justify-start">
                 <x-filament::button 
                     type="submit" 
+                    color="warning"
                     icon="heroicon-m-sparkles"
                     wire:loading.attr="disabled"
                     wire:target="generate"
