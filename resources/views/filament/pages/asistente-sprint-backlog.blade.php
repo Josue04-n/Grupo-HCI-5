@@ -46,11 +46,11 @@
 
                 <x-filament::button 
                     color="info" 
-                    icon="heroicon-m-eye"
-                    wire:click="previewPdf"
+                    icon="{{ $showPreview ? 'heroicon-m-pencil-square' : 'heroicon-m-eye' }}"
+                    wire:click="togglePreview"
                     size="sm"
                 >
-                    Vista Previa PDF
+                    {{ $showPreview ? 'Volver al Editor' : 'Vista Previa PDF' }}
                 </x-filament::button>
 
                 <x-filament::button 
@@ -72,7 +72,21 @@
                 </x-filament::button>
             </div>
 
-            {{ $this->backlogForm }}
+            @if($showPreview)
+                <div class="mt-4 border rounded-lg overflow-hidden bg-white" style="height: 800px;">
+                    <iframe 
+                        src="data:application/pdf;base64,{{ base64_encode(Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.sprint-backlog', [
+                            'content' => Illuminate\Support\Str::markdown($this->getCurrentBacklogContent()),
+                            'aplicativo' => App\Models\CatAplicativo::find($this->data['aplicativo_id'])?->nombre
+                        ])->output()) }}" 
+                        width="100%" 
+                        height="100%" 
+                        style="border: none;"
+                    ></iframe>
+                </div>
+            @else
+                {{ $this->backlogForm }}
+            @endif
         </x-filament::section>
     @endif
 </x-filament-panels::page>

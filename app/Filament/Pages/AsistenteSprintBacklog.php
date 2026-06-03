@@ -38,12 +38,22 @@ class AsistenteSprintBacklog extends Page implements HasForms
     public ?string $backlogContent = null;
     public ?array $backlogData = [];
     public ?array $jsonItems = [];
+    public bool $showPreview = false;
     public ?string $feedbackMessage = null;
     public ?string $feedbackType = null;
 
     public function mount(): void
     {
         $this->form->fill();
+    }
+
+    public function togglePreview(): void
+    {
+        if (empty($this->getCurrentBacklogContent())) {
+            Notification::make()->title('No hay contenido para previsualizar')->warning()->send();
+            return;
+        }
+        $this->showPreview = !$this->showPreview;
     }
 
     public function form(Schema $schema): Schema
@@ -130,11 +140,63 @@ class AsistenteSprintBacklog extends Page implements HasForms
 
     protected function loadBacklogFromHistory(string $content, ?array $jsonData = null): void
     {
+        $this->jsonItems = $jsonData ?? [];
+        
+        // Si hay datos JSON pero el contenido no tiene el dashboard, lo inyectamos
+        if (!empty($this->jsonItems) && !str_contains($content, 'DASHBOARD ESTRATÉGICO')) {
+            $dashboard = $this->generateStrategicDashboard($this->jsonItems);
+            $content = $dashboard . "\n\n---\n\n" . $content;
+        }
+
         $this->backlogContent = $content;
         $this->backlogData = [
             'backlogContent' => $content,
         ];
-        $this->jsonItems = $jsonData ?? [];
+    }
+
+    protected function generateStrategicDashboard(array $items): string
+    {
+        $totalSP = collect($items)->sum('story_points');
+        $userStories = collect($items)->where('type', 'User Story')->count();
+        $techTasks = collect($items)->where('type', 'Technical Task')->count();
+        $priorities = collect($items)->pluck('priority')->unique();
+        
+        $mainPriority = $priorities->contains('Critical') ? '🔴 Crítica' : ($priorities->contains('High') ? '🟠 Alta' : '🟡 Media');
+        
+        $valueScore = $this->calculateSprintValue($items);
+        
+        $markdown = "## 📊 DASHBOARD ESTRATÉGICO (Calculado)\n\n";
+        $markdown .= "| Métrica | Detalle |\n";
+        $markdown .= "| :--- | :--- |\n";
+        $markdown .= "| **Resumen del Sprint** | {$userStories} Historias / {$techTasks} Tareas |\n";
+        $markdown .= "| **Puntos de Historia (SP)** | Total: **{$totalSP} SP** |\n";
+        $markdown .= "| **Prioridad General** | {$mainPriority} |\n";
+        $markdown .= "| **Valor del Sprint** | **{$valueScore}/10** |\n";
+        $markdown .= "| **Confianza IA** | 🟢 Alta (Basada en estructura JSON) |\n\n";
+        
+        $markdown .= "### 🎯 Objetivo del Sprint\n";
+        $markdown .= "Resolver las " . count($items) . " necesidades detectadas priorizando la estabilidad y el impacto en el usuario.\n";
+        
+        return $markdown;
+    }
+
+    protected function calculateSprintValue(array $items): float
+    {
+        if (empty($items)) return 0;
+        
+        $score = 0;
+        foreach ($items as $item) {
+            $multiplier = match($item['priority'] ?? 'Medium') {
+                'Critical' => 10,
+                'High' => 8,
+                'Medium' => 5,
+                'Low' => 3,
+                default => 5,
+            };
+            $score += $multiplier;
+        }
+        
+        return round(($score / (count($items) * 10)) * 10, 1);
     }
 
     protected function getCurrentBacklogContent(): string
@@ -275,25 +337,28 @@ class AsistenteSprintBacklog extends Page implements HasForms
 
     public function previewPdf()
     {
-        $content = $this->backlogData['backlogContent'] ?? $this->backlogContent ?? '';
+        $content = $this->getCurrentBacklogContent();
         
         if (empty($content)) {
             Notification::make()->title('No hay contenido para previsualizar')->warning()->send();
             return;
         }
 
-        // Convertimos Markdown a HTML para que el PDF se vea bien
-        $htmlContent = Str::markdown($content);
+        $aplicativo = CatAplicativo::find($this->data['aplicativo_id'])?->nombre;
+        
+        // Aseguramos que el contenido sea UTF-8 limpio antes de procesar
+        $htmlContent = Str::markdown(mb_convert_encoding($content, 'UTF-8', 'UTF-8'));
 
         $pdf = Pdf::loadView('pdf.sprint-backlog', [
             'content' => $htmlContent,
+            'aplicativo' => $aplicativo
         ]);
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
-        }, 'preview-backlog.pdf', [
+        }, 'preview.pdf', [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="preview-backlog.pdf"',
+            'Content-Disposition' => 'inline; filename="preview.pdf"',
         ]);
     }
 
@@ -310,11 +375,27 @@ class AsistenteSprintBacklog extends Page implements HasForms
     public function exportPdf()
     {
         $content = $this->getCurrentBacklogContent();
-        $filename = 'Sprint-Backlog-' . Str::slug((string) ($this->data['aplicativo_id'] ?? 'backlog')) . '.pdf';
+        
+        if (empty($content)) {
+            Notification::make()->title('No hay contenido para exportar')->warning()->send();
+            return;
+        }
 
-        return response()->streamDownload(function () use ($content) {
-            echo "SPRINT BACKLOG GLOBAL\n\n";
-            echo $content;
-        }, $filename);
+        $aplicativo = CatAplicativo::find($this->data['aplicativo_id']);
+        $aplicativoNombre = $aplicativo?->nombre ?? 'Backlog';
+        $filename = 'Sprint-Backlog-' . Str::slug($aplicativoNombre) . '.pdf';
+
+        $htmlContent = Str::markdown($content);
+
+        $pdf = Pdf::loadView('pdf.sprint-backlog', [
+            'content' => $htmlContent,
+            'aplicativo' => $aplicativoNombre
+        ]);
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, $filename, [
+            'Content-Type' => 'application/pdf',
+        ]);
     }
 }

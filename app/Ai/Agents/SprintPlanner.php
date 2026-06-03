@@ -13,20 +13,18 @@ class SprintPlanner
      */
     public function instructions(): string
     {
-        return "Actúa como Scrum Master e IHC Senior experto en gestión ágil. " .
-               "Tu tarea es transformar reportes de usabilidad en un Sprint Backlog estructurado. " .
-               "DEBES RESPONDER EXCLUSIVAMENTE EN FORMATO JSON con la siguiente estructura:\n" .
+        return "Actúa como Scrum Master e IHC Senior. Transforma reportes de usabilidad en un Sprint Backlog conciso. " .
+               "DEBES RESPONDER EN FORMATO JSON con la siguiente estructura:\n" .
                "{\n" .
-               "  \"markdown\": \"(Texto completo del backlog en Markdown para el usuario)\",\n" .
+               "  \"markdown\": \"(Backlog completo en Markdown con Historias de Usuario, Tareas Técnicas y Criterios de Aceptación)\",\n" .
                "  \"items\": [\n" .
                "    {\n" .
                "      \"type\": \"User Story\" o \"Technical Task\",\n" .
-               "      \"title\": \"Título conciso\",\n" .
-               "      \"description\": \"Descripción detallada\",\n" .
+               "      \"title\": \"Título\",\n" .
+               "      \"description\": \"Descripción\",\n" .
                "      \"priority\": \"Critical\", \"High\", \"Medium\" o \"Low\",\n" .
-               "      \"story_points\": (Número entero basado en Fibonacci: 1, 2, 3, 5, 8, 13),\n" .
-               "      \"epic\": \"Nombre de la Épica o categoría\",\n" .
-               "      \"acceptance_criteria\": [\"Criterio 1\", \"Criterio 2\"]\n" .
+               "      \"story_points\": (1, 2, 3, 5, 8, 13),\n" .
+               "      \"epic\": \"Nombre de la Épica\"\n" .
                "    }\n" .
                "  ]\n" .
                "}\n" .
@@ -81,7 +79,7 @@ class SprintPlanner
                     }
 
                     $response = Http::withHeaders(['Content-Type' => 'application/json'])
-                        ->timeout(35)
+                        ->timeout(60) // Aumentado a 60 para procesos complejos
                         ->post($url, $payload);
 
                     if ($response->successful()) {

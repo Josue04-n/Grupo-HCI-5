@@ -2,59 +2,88 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Sprint Backlog</title>
+    <title>Sprint Backlog - Professional Report</title>
     <style>
+        @page { margin: 1.5cm; }
         body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            margin: 40px;
+            font-family: 'Helvetica', sans-serif;
+            color: #2d3748;
+            line-height: 1.5;
+            font-size: 11pt;
         }
-        .header {
-            text-align: center;
-            border-bottom: 2px solid #4a5568;
-            margin-bottom: 30px;
+        .header-table {
+            width: 100%;
+            border-bottom: 2px solid #6161FF;
             padding-bottom: 10px;
+            margin-bottom: 20px;
         }
-        .header h1 {
+        .title {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #1a202c;
             margin: 0;
-            color: #2d3748;
-            font-size: 24px;
         }
-        .header p {
-            margin: 5px 0 0;
+        .metadata {
+            text-align: right;
+            font-size: 9pt;
             color: #718096;
-            font-size: 14px;
         }
-        .content {
-            font-size: 14px;
-        }
-        h1, h2, h3 {
-            color: #2d3748;
-        }
-        pre {
+        .user-info {
+            margin-bottom: 20px;
             background: #f7fafc;
             padding: 10px;
-            border-radius: 4px;
-            border: 1px solid #e2e8f0;
-            white-space: pre-wrap;
+            border-left: 4px solid #6161FF;
+            font-size: 10pt;
         }
-        /* Estilos básicos para simular Markdown */
-        .markdown-body h1 { border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
-        .markdown-body h2 { border-bottom: 1px solid #eee; padding-bottom: 0.3em; margin-top: 24px; }
-        .markdown-body ul { padding-left: 20px; }
-        .markdown-body li { margin-bottom: 5px; }
-        .markdown-body code { background: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
+        .content {
+            margin-top: 20px;
+        }
+        /* Markdown Styling */
+        h2 { color: #2d3748; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 25px; font-size: 16pt; }
+        h3 { color: #4a5568; margin-top: 20px; font-size: 13pt; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th { background: #edf2f7; text-align: left; padding: 8px; border: 1px solid #e2e8f0; }
+        td { padding: 8px; border: 1px solid #e2e8f0; vertical-align: top; }
+        ul { margin-bottom: 10px; }
+        li { margin-bottom: 4px; }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8pt;
+            color: #a0aec0;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 5px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Sprint Backlog Global</h1>
-        <p>Generado el: {{ now()->format('d/m/Y H:i') }}</p>
+    <table class="header-table">
+        <tr>
+            <td>
+                <h1 class="title">Sprint Backlog</h1>
+                <p style="margin: 0; color: #4a5568;">{{ $aplicativo ?? 'Proyecto UX' }}</p>
+            </td>
+            <td class="metadata">
+                Generado: {{ now()->format('d/m/Y H:i') }}<br>
+                ID Reporte: {{ uniqid() }}
+            </td>
+        </tr>
+    </table>
+
+    <div class="user-info">
+        <strong>Generado por:</strong> {{ auth()->user()->name ?? 'Asistente IA' }}<br>
+        <strong>Email:</strong> {{ auth()->user()->email ?? 'n/a' }}<br>
+        <strong>Rol:</strong> Scrum Master / IHC Analyst
     </div>
 
-    <div class="content markdown-body">
+    <div class="content">
         {!! $content !!}
+    </div>
+
+    <div class="footer">
+        © {{ date('Y') }} Dashboard de Usabilidad - Reporte generado automáticamente por IA & Local Logic.
     </div>
 </body>
 </html>
