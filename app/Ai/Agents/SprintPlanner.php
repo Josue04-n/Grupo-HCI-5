@@ -13,22 +13,25 @@ class SprintPlanner
      */
     public function instructions(): string
     {
-        return "Actúa como Scrum Master e IHC Senior. Transforma reportes de usabilidad en un Sprint Backlog conciso. " .
-               "DEBES RESPONDER EN FORMATO JSON con la siguiente estructura:\n" .
+        return "Actúa como Scrum Master e IHC Senior. Transforma reportes de usabilidad en un Sprint Backlog conciso.\n" .
+               "REGLAS DE CONTENIDO: Por cada ítem explica detalladamente qué falla, qué impacto tiene en el usuario y cómo solucionarlo técnicamente.\n" .
+               "RETROALIMENTACIÓN ESTRATÉGICA: Debes incluir una sección de síntesis indicando con qué tarea empezar, por qué se elige esa primero y qué ganamos con esto en términos de mejora de usabilidad.\n" .
+               "IMPORTANTE: DEBES RESPONDER ÚNICAMENTE CON EL OBJETO JSON, SIN TEXTO ADICIONAL ANTES O DESPUÉS.\n" .
+               "ESTRUCTURA JSON:\n" .
                "{\n" .
                "  \"markdown\": \"(Backlog completo en Markdown con Historias de Usuario, Tareas Técnicas y Criterios de Aceptación)\",\n" .
+               "  \"synthesis\": \"(Retroalimentación estratégica: qué hacer primero, por qué y beneficios)\",\n" .
                "  \"items\": [\n" .
                "    {\n" .
                "      \"type\": \"User Story\" o \"Technical Task\",\n" .
-               "      \"title\": \"Título\",\n" .
-               "      \"description\": \"Descripción\",\n" .
+               "      \"title\": \"Título específico del problema\",\n" .
+               "      \"description\": \"Descripción detallada\",\n" .
                "      \"priority\": \"Critical\", \"High\", \"Medium\" o \"Low\",\n" .
                "      \"story_points\": (1, 2, 3, 5, 8, 13),\n" .
                "      \"epic\": \"Nombre de la Épica\"\n" .
                "    }\n" .
                "  ]\n" .
-               "}\n" .
-               "Reglas: Hallazgos Críticos/Altos -> User Stories. Hallazgos Medios -> Technical Tasks.";
+               "}";
     }
 
     /**
@@ -85,15 +88,19 @@ class SprintPlanner
                     if ($response->successful()) {
                         $rawText = $response->json('candidates.0.content.parts.0.text');
                         
-                        // Intentamos limpiar si la IA puso triple comillas de markdown
-                        $cleanJson = preg_replace('/^```json\s*|\s*```$/', '', trim($rawText));
+                        // Extraer el JSON usando regex para ser más robustos ante texto conversacional
+                        $cleanJson = $rawText;
+                        if (preg_match('/\{.*\}/s', $rawText, $matches)) {
+                            $cleanJson = $matches[0];
+                        }
+                        
                         $data = json_decode($cleanJson, true);
                         
                         if ($data && isset($data['markdown'])) {
                             return $data;
                         }
 
-                        // Si no pudimos parsear pero tenemos texto, devolvemos al menos el texto
+                        // Si falló el parseo JSON pero tenemos texto, intentamos devolverlo como markdown
                         return [
                             'markdown' => $rawText,
                             'items' => []

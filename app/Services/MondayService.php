@@ -39,12 +39,15 @@ class MondayService
             'variables' => $variables,
         ]);
 
-        if ($response->failed()) {
-            Log::error('Monday API Error: ' . $response->body());
-            throw new \Exception('Error al conectar con Monday.com: ' . $response->body());
+        $data = $response->json();
+
+        if ($response->failed() || isset($data['errors'])) {
+            $errorMessage = $data['errors'][0]['message'] ?? $response->body();
+            Log::error('Monday API Error: ' . $errorMessage);
+            throw new \Exception('Error de Monday.com: ' . $errorMessage);
         }
 
-        return $response->json();
+        return $data;
     }
 
     /**
@@ -62,6 +65,10 @@ class MondayService
             'boardId' => $this->boardId,
             'groupName' => $groupName,
         ]);
+
+        if (!isset($result['data']['create_group']['id'])) {
+            throw new \Exception('No se pudo obtener el ID del grupo creado. Revisa si el BOARD_ID es correcto.');
+        }
 
         return $result['data']['create_group']['id'];
     }

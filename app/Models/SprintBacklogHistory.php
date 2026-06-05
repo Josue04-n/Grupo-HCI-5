@@ -12,6 +12,7 @@ class SprintBacklogHistory extends Model
         'aplicativo_id',
         'content',
         'json_data',
+        'synthesis',
         'version_name'
     ];
 

@@ -36,6 +36,7 @@ class AsistenteSprintBacklog extends Page implements HasForms
 
     public ?array $data = [];
     public ?string $backlogContent = null;
+    public ?string $synthesis = null;
     public ?array $backlogData = [];
     public ?array $jsonItems = [];
     public bool $showPreview = false;
@@ -95,7 +96,7 @@ class AsistenteSprintBacklog extends Page implements HasForms
                         
                         $history = SprintBacklogHistory::find($state);
                         if ($history) {
-                            $this->loadBacklogFromHistory($history->content, $history->json_data);
+                            $this->loadBacklogFromHistory($history->content, $history->json_data, $history->synthesis);
 
                             Notification::make()
                                 ->title('Versión cargada')
@@ -132,20 +133,27 @@ class AsistenteSprintBacklog extends Page implements HasForms
     protected function resetBacklogDraft(): void
     {
         $this->backlogContent = null;
+        $this->synthesis = null;
         $this->backlogData = [];
         $this->jsonItems = [];
         $this->feedbackMessage = null;
         $this->feedbackType = null;
     }
 
-    protected function loadBacklogFromHistory(string $content, ?array $jsonData = null): void
+    protected function loadBacklogFromHistory(string $content, ?array $jsonData = null, ?string $synthesis = null): void
     {
         $this->jsonItems = $jsonData ?? [];
+        $this->synthesis = $synthesis;
         
         // Si hay datos JSON pero el contenido no tiene el dashboard, lo inyectamos
         if (!empty($this->jsonItems) && !str_contains($content, 'DASHBOARD ESTRATÉGICO')) {
             $dashboard = $this->generateStrategicDashboard($this->jsonItems);
             $content = $dashboard . "\n\n---\n\n" . $content;
+        }
+
+        // Inyectamos la síntesis si existe y no está en el contenido
+        if ($this->synthesis && !str_contains($content, 'SÍNTESIS Y RETROALIMENTACIÓN ESTRATÉGICA')) {
+            $content .= "\n\n---\n\n## 💡 SÍNTESIS Y RETROALIMENTACIÓN ESTRATÉGICA\n\n" . $this->synthesis;
         }
 
         $this->backlogContent = $content;
@@ -206,6 +214,7 @@ class AsistenteSprintBacklog extends Page implements HasForms
 
     public function generate(SprintPlanner $agent): void
     {
+        set_time_limit(120);
         $state = $this->form->getState();
         $this->feedbackMessage = 'Procesando el backlog con IA. Esto puede tardar unos segundos.';
         $this->feedbackType = 'info';
@@ -240,9 +249,16 @@ class AsistenteSprintBacklog extends Page implements HasForms
 
             $response = $agent->generateGlobalDraft($pruebas, $aplicativo->nombre);
             
-            $this->loadBacklogFromHistory($response['markdown'] ?? '', $response['items'] ?? []);
+            $content = $response['markdown'] ?? '';
+            $this->synthesis = $response['synthesis'] ?? null;
 
-            $this->feedbackMessage = 'Backlog generado correctamente con Épicas y Story Points. Ya puedes publicarlo en Monday.com.';
+            if ($this->synthesis) {
+                $content .= "\n\n---\n\n## 💡 SÍNTESIS Y RETROALIMENTACIÓN ESTRATÉGICA\n\n" . $this->synthesis;
+            }
+
+            $this->loadBacklogFromHistory($content, $response['items'] ?? [], $this->synthesis);
+
+            $this->feedbackMessage = 'Backlog generado correctamente con síntesis estratégica.';
             $this->feedbackType = 'success';
 
             Notification::make()
@@ -281,6 +297,7 @@ class AsistenteSprintBacklog extends Page implements HasForms
             'aplicativo_id' => $aplicativoId,
             'content' => $content,
             'json_data' => $this->jsonItems,
+            'synthesis' => $this->synthesis,
             'version_name' => 'Backlog ' . now()->format('d/m/Y H:i'),
         ]);
 
